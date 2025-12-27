@@ -175,7 +175,10 @@ class MainActivity : ComponentActivity() {
         JTVConfigurationManager.getInstance(this).saveJTVConfiguration()
         isServerRunning = BinaryService.isRunning
 
-        if (preferenceManager.myPrefs.setupPending) {
+        if (preferenceManager.myPrefs.setupPending &&
+            preferenceManager.myPrefs.operationMODE != 0 &&
+            preferenceManager.myPrefs.operationMODE != 1
+        ) {
             val intent = Intent(this, SetupWizardActivity::class.java)
             this.startActivity(intent)
 
@@ -193,6 +196,7 @@ class MainActivity : ComponentActivity() {
             finish()
             return
         }
+
 
         if (isServerRunning) {
             BinaryService.instance?.binaryOutput?.observe(this) {
@@ -840,12 +844,12 @@ class MainActivity : ComponentActivity() {
 
                     // Create the file output stream
                     val file = File(path, fileName)
-                    response.body?.byteStream()?.use { inputStream ->
+                    response.body.byteStream().use { inputStream ->
                         file.outputStream().use { outputStream ->
                             val buffer = ByteArray(8192)
                             var bytesRead: Int
                             var totalBytesRead = 0L
-                            val contentLength = response.body?.contentLength() ?: -1L
+                            val contentLength = response.body.contentLength()
 
                             while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                                 outputStream.write(buffer, 0, bytesRead)
